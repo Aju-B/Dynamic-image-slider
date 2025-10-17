@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IBM Store — Demo</title>
+<style>
+/* --- Style block, do not change this --- */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#f0f2f5;color:#333;}
+.hidden{display:none;}
+h1,h2,h3{text-align:center;margin-bottom:20px;}
+input, select{width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;border-radius:6px;}
+button{padding:8px 12px;border:none;border-radius:6px;background:#007bff;color:#fff;cursor:pointer;font-size:14px;}
+button:hover{background:#0056b3;}
+.login-container{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:40px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.2);width:320px;text-align:center;}
+.navbar{display:flex;justify-content:space-between;align-items:center;background:#2874f0;padding:12px 20px;color:#fff;border-radius:10px;margin-bottom:20px;}
+.navbar .logo{font-weight:700;font-size:20px;}
+.navbar button{background:#ff9f00;color:#fff;margin-left:8px;}
+.hero{background:linear-gradient(135deg,#ff0000,#f38282);color:#fff;padding:40px 20px;text-align:center;border-radius:12px;margin-bottom:20px;position:relative;overflow:hidden;}
+.hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.3;border-radius:12px;z-index:0;}
+.hero-content{position:relative;z-index:1;max-width:500px;margin:auto;}
+.promo-cards{display:flex;gap:12px;overflow-x:auto;margin-bottom:20px;}
+.promo-cards .card{flex:0 0 200px;padding:20px;border-radius:10px;text-align:center;color:#fff;}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;}
+.product-card{border:1px solid #ddd;border-radius:8px;padding:10px;cursor:pointer;position:relative;transition:0.3s;text-align:center;}
+.product-card:hover{transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.15);}
+.product-card img{width:100%;height:150px;object-fit:cover;border-radius:6px;}
+.offer-ribbon{position:absolute;top:8px;left:-8px;background:#ff4a4a;color:#fff;font-size:12px;font-weight:700;padding:4px 8px;transform:rotate(-20deg);border-radius:4px;z-index:2;}
+.cart-item{display:flex;justify-content:space-between;align-items:center;margin:10px 0;border-bottom:1px solid #eee;padding-bottom:8px;}
+.cart-item span{flex:1;}
+.qty-controls{display:flex;align-items:center;gap:6px;}
+.qty-controls button{background:#6c757d;color:#fff;border-radius:4px;padding:2px 6px;}
+.qty-controls button:hover{background:#495057;}
+.remove-btn{background:#dc3545;color:#fff;border-radius:4px;padding:2px 6px;}
+.remove-btn:hover{background:#b02a37;}
+.center{text-align:center;margin-top:20px;}
+.back-btn{background:#6c757d;color:#fff;margin-bottom:15px;}
+.back-btn:hover{background:#565e64;}
+.section{border-radius:12px;padding:20px;margin-bottom:20px;}
+#sliderControls{margin-top:10px;text-align:center;}
+#sliderControls button{margin:0 6px;padding:6px 12px;border-radius:6px;border:1px solid #2874f0;background:#fff;color:#2874f0;cursor:pointer;font-weight:700;}
+#thumbnailContainer{display:flex;justify-content:center;margin-top:10px;gap:6px;flex-wrap:wrap;}
+#thumbnailContainer img{width:50px;height:50px;object-fit:cover;border:2px solid #ddd;border-radius:4px;cursor:pointer;}
+#thumbnailContainer img.selected{border-color:#007bff;}
+.slider-wrapper {width:100%;max-height:400px;display:flex;justify-content:center;align-items:center;overflow:hidden;margin-bottom:10px;}
+#detailImg {width: 30%;height: 30%;object-fit:contain;border-radius:8px;display:block;}
+#searchContainer{display:flex; gap:6px; margin-bottom:10px;}
+#categoryButtons{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:15px;}
+#categoryButtons button{background:#f0f0f0;color:#333;border:1px solid #ccc;}
+#categoryButtons button:hover{background:#2874f0;color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+  <h2>IBM Store Login</h2>
+  <form id="loginForm" class="form active">
+    <input type="email" id="loginEmail" placeholder="Email" required />
+    <input type="password" id="loginPassword" placeholder="Password" required />
+    <button type="submit">Sign In</button>
+  </form>
+  <p>
+    Don't have an account? 
+    <button id="showSignupBtn" type="button" style="background:#6c757d;">Sign Up</button>
+  </p>
+</div>
+
+<!-- SIGNUP PAGE -->
+<div id="signupPage" class="login-container hidden">
+  <h2>IBM Store Signup</h2>
+  <form id="signupForm" class="form">
+    <input type="text" id="signupName" placeholder="Full Name" required />
+    <input type="email" id="signupEmail" placeholder="Email" required />
+    <input type="password" id="signupPassword" placeholder="Password" required />
+    <button type="submit">Create Account</button>
+  </form>
+  <p>
+    Already have an account?
+    <button id="showLoginBtn" type="button" style="background:#6c757d;">Log In</button>
+  </p>
+</div>
+
+<!-- HOME PAGE -->
+<div id="homePage" class="hidden">
+  <div class="navbar">
+    <div class="logo">IBM Store</div>
+    <div>
+      <button onclick="showCart()">Cart 🛒 (<span id="cartCount">0</span>)</button>
+      <button onclick="showOrders()">📦 Orders</button>
+      <button onclick="logout()" style="background:#6c757d;">Logout</button>
+    </div>
+  </div>
+  <div class="hero">
+    <img src="https://img.freepik.com/free-vector/happy-diwali-red-banner-with-text-space_1017-28648.jpg" alt="Diwali Sale Banner">
+    <div class="hero-content">
+      <h1>🔥 Diwali Sale!</h1>
+      <p>Up to 50% off on selected products 🎉</p>
+      <button onclick="alert('Offers start soon...')">Grab Offers</button>
+    </div>
+  </div>
+  <div class="promo-cards">
+    <div class="card" style="background:#facc15;color:#333;">Buy 1 Get 1 Free<br>Accessories</div>
+    <div class="card" style="background:#f472b6;">20% OFF<br>Smartphones</div>
+    <div class="card" style="background:#60a5fa;">Free Shipping<br>Orders ₹5000+</div>
+  </div>
+  <div id="searchContainer">
+    <input type="text" id="searchBar" placeholder="Search products..." style="flex:1; padding:10px 10px 10px 35px; border-radius:6px; border:1px solid #ccc; background: url('https://cdn-icons-png.flaticon.com/512/622/622669.png') no-repeat 10px center; background-size:16px 16px;">
+    <button onclick="searchProducts()" style="padding:10px 15px; border-radius:6px; background:#2874f0; color:#fff; border:none; cursor:pointer;">Search</button>
+  </div>
+  <div id="categoryButtons">
+    <button onclick="filterCategory('All')">All</button>
+    <button onclick="filterCategory('Electronics')">Electronics</button>
+    <button onclick="filterCategory('Computers')">Computers</button>
+    <button onclick="filterCategory('Mobiles')">Mobiles</button>
+    <button onclick="filterCategory('Appliances')">Appliances</button>
+    <button onclick="filterCategory('Accessories')">Accessories</button>
+    <button onclick="filterCategory('Audio')">Audio</button>
+    <button onclick="filterCategory('Wearables')">Wearables</button>
+  </div>
+  <section class="section" style="background: linear-gradient(135deg,#fef9c3,#d9f99d);">
+    <h2>Top Deals</h2>
+    <div id="productList" class="product-grid"></div>
+  </section>
+</div>
+
+<!-- PRODUCT DETAIL PAGE -->
+<div id="productDetailPage" class="hidden">
+  <button onclick="backToHome()" class="back-btn">← Back</button>
+  <h2 id="detailName"></h2>
+  <div class="slider-wrapper">
+    <img id="detailImg">
+  </div>
+  <div id="sliderControls">
+    <button onclick="prevSlide()">Prev</button>
+    <span id="slideIndicator"></span>
+    <button onclick="nextSlide()">Next</button>
+  </div>
+  <div id="thumbnailContainer"></div>
+  <p id="detailDesc"></p>
+  <p><strong>Price:</strong> ₹<span id="detailPrice"></span></p>
+  <button onclick="addToCart()">Add to Cart</button>
+</div>
+
+<!-- CART PAGE -->
+<div id="cartPage" class="hidden">
+  <button onclick="backToHome()" class="back-btn">← Back to Home</button>
+  <h2>Shopping Cart</h2>
+  <div id="cartItems"></div>
+  <div class="center">Total: ₹<span id="cartTotal">0</span></div>
+  <div class="center"><button onclick="Buy()">Buy</button></div>
+</div>
+
+<!-- ORDER HISTORY PAGE -->
+<div id="orderHistoryPage" class="hidden">
+  <button onclick="backToHome()" class="back-btn">← Back to Home</button>
+  <h2>📦 My Order</h2>
+  <div id="orderList"></div>
+</div>
+
+<script>
+let currentUser = "", cart = [], currentProduct = null, currentSlide = 0;
+let token = localStorage.getItem("ibm_token") || "";
+
+const loginPage = document.getElementById("loginPage");
+const signupPage = document.getElementById("signupPage");
+const homePage = document.getElementById("homePage");
+const productDetailPage = document.getElementById("productDetailPage");
+const cartPageDiv = document.getElementById("cartPage");
+const orderHistoryPage = document.getElementById("orderHistoryPage");
+const productList = document.getElementById("productList");
+const detailName = document.getElementById("detailName");
+const detailDesc = document.getElementById("detailDesc");
+const detailPrice = document.getElementById("detailPrice");
+const detailImg = document.getElementById("detailImg");
+const cartCountEl = document.getElementById("cartCount");
+const slideIndicator = document.getElementById("slideIndicator");
+const thumbnailContainer = document.getElementById("thumbnailContainer");
+const searchBar = document.getElementById("searchBar");
+
+// ------ PASTE YOUR FULL PRODUCTS ARRAY HERE ------
+const products = [
+  {id:1,name:"Laptop",desc:"High performance laptop",price:60000,images:[
+    "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQkwGBWvuL9Jofdx2iWsulxSUi9LOqhdm4ubPgkegrfwJ_8-xGVtWYOWhx0i--XYMEUkwf3-ZLwTjZg68Et8hvIUu8KT_C6JyntNR9Ka-ZBSUAUPGMr1ajs",
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT8NK0g9xVj1kWhYeIo-pj7NN2O232LdTKs59UFrjLnG_rvzWUDEuqLuispGjRN8VZnxZdTAANOED5Jcs6sjxipKJ2E3LXfNPdFgjc9VvOE1fvnvutODb4",
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQ-MPH-mHiccCECDJR4FhnOIIkgu7wMlPAkapNts6KIyQgSFTKVvHehZilr11wqLjAEqaYB61Bc8HZbX8XshCS2ruMaPrNCiOGfz32zBNiuI2I0V1tVzC-t"], category:"Computers"},
+  {id:2,name:"Smartphone",desc:"Latest Android smartphone",price:25000,images:["https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQR0sx5yVavLAVwY3jhIx_qJhcTOn8sKQIB3Cw__zQe-voUgosKeZmDPa6RdjEevD31Lzw68Xwy9o8cm1-Jj-54lg5BDuG3h5QHPYOXv0HE75m93uXARITs","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTGboclcI8rcktYsH2dnhguiGvjRV7TDj_CyLdJ2nN79XnxHvG55UNr-7A2RWzjuAIN8-oLiL_bQjYYJHwqpnEKovO-8dkiLaYUKOlpmNL6JNMAkxQmjvcU","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS8c0tSKcAgVTMUleTBvdhD6WjYAND6JMeIW9kXxmmlWbWP0WIiLEGbEN8XbN7enBz1BHw6UGh3AdOUwIYwLI4QHSUUnpeg2DbWhHMFbd3IhXjQ5fJ6WTkb"],category:"Mobiles"},
+  {id:3,name:"Headphones",desc:"Noise cancelling headphones",price:5000,images:["https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQZPoXPFVev6qS_JkOHcNEk3DF3kydoT6clXz-Zyx_Zt2Uu_rI9Q1tyvOsxfbTUjd_6tZK0Co_3K-TuDJs2Z04HN7GcrBtw_QB2dENsE5mJ14PeMY-EmNBOnA","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTsIyKBoSJ8fPSjHkRxSUfNg4wJ9ATRLzVIgTPe_FdpKMOD7JCSq_ewliI1XzmM71-_fqK0pAG8UTg3YlhdqBLh--p1ulM8YbL2aP4rOSOyRbci9GmoEAwN","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTEpkYPz1SBMA_7dDKDQ-yE0rIMeAbV7D79ElQNlA7_dA4eGrwOMmRzTVYamqsA9Ihf-TQAUPayT0H1UkC55ZUgqQh68agwqgRcEodNLI9JKTY3927n_Z0P","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcShnUecLQZmUDhmNigpteZ-OGs6xNFtgbZMk6L6NlWWYov3C28-knsnTdwxseJ-JKvEkRSuN7VPiLZCOAkMiDgqgFiGgjp6vW6_j-Lj0vIR"],category:"Audio"},
+  {id:4,name:"Tablet",desc:"Portable tablet",price:18000,images:["https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSUXc57GuewvCeHpxvuH_XFmHmhcIgM_h1hHEP8Cib1c2HgaIGnewRPblOEOFt4AeIL0tCgcNvafx2r_WI4s5Mq443Imm9xYFus13GXegUaT9DMg-hQ8o6b3g","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTGzSi5HzSYEVjP8eFxNZiX6beLuQJeYsE5O1II5yrGHXy2pOkPEAUBxvVi5s4F34OdnbtQvb_oBwD_Gdsh6yokyo32oFSJOv31fZBGLYECgihO22LJpKuMIA","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTRoxgyfV0-W5YDRYBGHWPdLDoA2Wv2tICFuRj5CRvq4h5Sl9gEpWc69qGPmDjcZvUg2BuPxbZ86rk4AC6lqiYj7kEiUrj6ozAEtmTy-cmANWNAUBKH9x14","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQimPq9hh-t2Hzmlu619xS7gG5yccybSQ2zwiWQxDXiDl8vnCEi0_baYpZyZc1VYfMPbKjGW_V2lxlHjcpC7NlIKX-DS_bIfu9eKjGAMuAu6t-3TNDJzpOmug"],category:"Computers"},
+  {id:5,name:"Smartwatch",desc:"Track your health and fitness",price:7000,images:["https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTjdHhqzFdxnY0uwj9VMFMpirHuLXktYjo9jrc-3mBJXvyXmhhQvyPKSI9vP2mqibUtk5aPj6RYYZqytv22T_10HO2SzqKNJk1I7FwCi21dLxAFnJXjyxt4","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcT_Ff6MTP--svIRfowNCC19e_ytjjJRKuzUz7VMaebKKWMsWuscQDSv3ytxy4Z1mEGQyN0EcQZmZtq7FsP5k0qqr41HuxUKEibeN1qVHa8m","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSCKx_IQjvTU-eLqN_gb0LzGp4eDqs1smYd-uRkDoV2B_xD2C6WD1-7mfaFzXEnT9e7hbtcs6R5UuKVPvqwapg5ezlRlHCHWrVito6Kuvw","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTv3SE9DM5PZDi1bRdrPkWSuN9NEHbAWa75UjxX6MjGZqkvATfh1JttsfZbRczsZcfECTIFhRcLY35E-Cwiugo1Pm7MiRN9-GdKx-VnCg","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQag87HYQOSb_4lUd3dWLlcVtk8dpWLRaV93jqpbKnOUmX103JQuU1Ln4QqTtvdbiH5zZIQLDQGyfGHm186PfMbXx9hKta2ZT8IoBfnJp8j","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSy4NIOGY-et2eH81bw4kOxsBHqh2YDlSEGGtfBF2OXP4-L7ZifOXbFPwypIkB_qKOzXJVC4SbWYDf33JkxcxWXTDltuibD3QDBJNk_iMo"],category:"Wearables"},
+  {id:6,name:"Camera",desc:"DSLR professional camera",price:45000,images:["https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRIwFbFCxts_CF0mVyAJNAkJalrd4dDD4nJWVKJ4evCpPoPQ1cwIoDtXu5sv6lD0r5eQ4U8fsgosBTDzNM7VRpyeTu558ccrN3bucNNviKeRqs9uounHMbT2w","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS_vcjZnLFSoPTmLVS47hPB9VQuQNdzTzADzsMGezDbs25oJlR9wVsEd0ySCE3ACVzKXHbF8EHRzJd4mPs7hZU36KwoQFljoRzmPMUvTqm-fFY7XWZe5kzHIw","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTeSOmzUAcPz35tOOATjfthD6TP4ynKGGNx_7ZGTofEyIS14ptx5E2qG1r50DGhNoss_JlIUMhjKE90UM1c9puFNj3Poo2wawLPGRL5wX4W75IFFeKl6j51Cw","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSJkmgJBja0SsdBkhCsEUX0ei2QgpnYZ-YUYtVChJ2NG-yEPSuND8datB2X1oZF2Z4vrc2KuK7Yvy1cETb5ShyAbKCow0_qx30xctBxZ_Cn2Ns6PaEa2mPx","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRjo7hrC2v_Fc1vRoKUIi9sF_h0YFEdlHmfOpjprIDCLJ_NZ4mXESAj8MyiJ7Vq2zw8BSlEZHazhp-gu8KKcjVR2kF0RmsNXhPkQH-zbw"],category:"Photography"},
+  {id:7,name:"Keyboard",desc:"Mechanical gaming keyboard",price:3500,images:["https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCLpg8E_4xMKVpZ2aSJ7jPfxivixqDZHUjW_FMD14gExs6p-lzGCmdJPLusw4rM40huTYXn7TtySCU5KCTzDKFlzyPnHai4MuuYsL6zHZN","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTRL9yGnpAlkrkTqFTXyca7iWtrdhReryrkpTiBHlQKfZdTVxTQp3qliabgZrX927A3EWg_VBM4r8kzTM3krA2HtCn-h3m8sP2XRf-lhkbD7xv0Sq03E0pEog","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS9wXckgz6N5x9NEzJHE4qECcBJxjiTkSv4MjxqCCyypaDvpv7W_4NtgBEkrAgte-9c8pzNLcITuiy-5_j8fYqrFYWfnzJovHCjOuWIFSM0mba9D7cowgmbPg","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQWaPasNmHxHs_WPTZpoJdhukwxhFBhaX3H7L7feuaWsBeTvmp0X_9TKx_p9olYjkNM8uWzc1U4VZ8zBxIdBN6I7yPN57Dg3vBAyEIkcxerUOb4ILxpGT6-"],category:"Computers"},
+  {id:8,name:"Mouse",desc:"Wireless ergonomic mouse",price:1200,images:["https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTPTjYNLLsctBpbids01Nt_6PlwT4uu_WzvrSFBB-BDx__mDEKiCBC_HmSjY3SQDt-Bo_H9l1hJu7z__tN6mApnKssuGuYencmsqlchU8kX6G_-38hJ3dwk","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSkOv13pDV5QFEXjYs-LL0O8nBWp5Ty6Em7kDCOOGBde3mTr247mEEhABPK6OqjdGUDpsLNbGQ2ubgN-Ib1gHbR0IiOGNjb11biF2JFhZXXPVg4IN_AqPRYBQ","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcROxyFTvZfwEzT21YMnsqahWK8L8DKLx51w5kxwhwj-VkGDcecFNDpkzzut86ygbeDzzzkU4yRb84ZVIC_zpH5cMOewknohLX8F2pWBmIQG","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTkJs91NFm6aWUv2qUe8oRCoCDnu8CHI35Q1agCc-CwY4LxEuITbtK7_7ZyJvAqK9HHM86aJMShIo3PwF7eYOtrkw_DwajoqnzdSySdmvyz_92wPlrZt77p","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRfeiMO_58mkTXoBRmkyOFH5sbjf3yRob2K7UJ0wapN7Qo7-_LCC9eEG480fmdo7FCWNLtteyHDb-IW0ibgQ4_sbRFpmhGBA6kGpRuhz7Yk"],category:"Computers"},
+  {id:9,name:"Monitor",desc:"4K Ultra HD Monitor",price:20000,images:["https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTyoh_uwOlXkUlqK7RTonJGVT_4cnoRyxeTHSznQpXKlvI5LD-4Ue4VcfyMv_xRQw1iQZFPEiN1lxtet42wlOEWFF7L-a-B_8MEVHOskO6fsPrSRQYtN5J1zw","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSaoSXHdKxrUXBjQvxKhsC99dDAe1y_PtOrwqxdwR_8rLRvXGYw8-GJkpc6qJE-igqfjjyD7fCoLGaLmhzVT4sttesR7Wrmdee1Zf49Nt28","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRTzzwlVkJCEnLy8JsbVIbSBekgQHkWWyguUJhWsEMbqFc7pJlzyOQxwS5Y4fuUE9H6MueuNjOkX_dto6JDXdXaitsEPjoCLZ03tFkCx46g","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTpW5eKRgY14Da2ZdO5_tjGJB4ndMhbYkS8McOKWkKkKCRHTWu4fZRPqsDu0C117IUrf71tq1Cd2gApbB118f1QdUY8jYGaD2lzTqMsgg4"],category:"Computers"},
+  {id:10,name:"Printer",desc:"All-in-one inkjet printer",price:8000,images:["https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRLUdM62Q3AU2inhOEMxh-fXHOtuRf53y2pI3UI-XiBV940uvc84qeTWkgrcy7iGwlpvHrGBllbxUYvKHbusMPr1xx4b6P9FafGzUqP7q7LAF3arMkXGzkrnw","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQWKWQEZY5Qw0lS2B4aLhb0sa1noYXsY0lfyA3wHiYWv9V4sOpN0nTNcKeE2YKAiWDgqxGWUDw1MjzkjAGpRa6IMXYG9ldN44U2_etk7MXhvQCNU4dw0Cf9","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTMZQav1Iz93qbEzzreHU0MMjhSkpT8a81n3bObG0yPhg30q7ICj0kFTn-bGmusY37jd35wACivlaf9lsWaNXwOPSGGwc7KinSQPCYP8kQ","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRUGTSFabcvyyvnABENbrfMqviqHp_RUiMZUyvEfETzI7HPFqxzYyiCy-3-OVWsp2m2AAfiTjZC--FRTmu9y_OtKVCysj9zzr933pQeBwSMQz4XQ6KhzMUkTw"],category:"Computers"},
+  {id:11,name:"Router",desc:"High speed WiFi router",price:3000,images:["https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTkHxBlqdYGaqAleHON4cIpFikxyhfktoaDtQvhNBo-kb0O2nmlpopPcvajWpNHh1h_wsZWRA5bhrK7lk_7Q0iFzTgv4rQX7yvv0K4xDrpjSV9Sxd6cF0Noxg","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRdSmFAKAeYFtw3ntdTppgWZFqZyxtf6IJT-es_4pDsVyV37l_sdFKtRLkhoXXG3kxgWF24-uxaLy8EEYzLbePJ01lyy0U83JkRqCUYq4o","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQSivJGpMB0T7oQOhpmFh4rYcfdHNWTryFP1psSEDBOx9rx6LOE_IqtvuPR2D7PSg6cxKDF5oMIld23EYFHZ4vpKaHjNX-ylSQ2lbWzQmE","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTBU8IiXBXk0_Yi8waLg50M5i6GsPErsWV4Wu3b_EHLLVV-wuFQMRzPkbkd86Hneg2i2ZfoPJKGI3-cOJBnFvOBW4KJzlUeB6VRssbJCvql"],category:"Networking"},
+  {id:12,name:"Speakers",desc:"Bluetooth portable speakers",price:4000,images:["https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSMSNrXRqsafrjjuRIpnOZ3cJbQnpltpiPnCq_jhBMyXJYq7TTU6ZgI1IuXnq3CaTn79hurolJhut8KaOh-Sr-bQ6mtjkSVrdD_IF45v0ilawe-OT6JWdTa6Q","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRg2H5fC-2OcmFRz6DJtgDUiwsigqmH4uEor5ad5MO8D8ql2M0TLNXjlfpVI8EX5tlEGwdxVoMDzLp-OENYWgdm8kmrojmkE6U0HrmH6TuL5QLADXVx4D_H","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRgn-6VYAa3AqFvoXMtPf-_OhfJ9Uhh2JfRpnWtSmOgpENaRqo3LOQgYMDC_zGX6M0ICyTvNgo5C2tH06MNKHmQTJODnyAdzGxgYotb9ZHpQznIB6AI-ELo","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRjJl-ZidMrr1ygRQt6IR1WAFOw1DZrqniD3xSUvQA8xshVLzt2RQEwP8_AjSW5eVqJRD1uTgcy4fyjBLqR4K5R6Ac2VsFQy9uYLTbAsO-Ykvrfwlv4Bc70"],category:"Audio"},
+  {id:13,name:"External HDD",desc:"1TB external hard disk",price:6000,images:["https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR6UJEI2FUmZyZUiJO2SbE-lMloyV-rRuCyK98fOXcQ4cD6uPYWirp9-d8QXlXmvTFiwrkdRGugQ_0cIS2LSPmJcyK1ocBsixl9LCtB0K_U1Ymmp0WPq2ZJtg","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTHJY58TZRIeQKQk13YGK3olR5GwBD-bPBZcrsocwBVIqqP5-_yUVbnWw7xyjB6uaV_yfceolE93Xy_Kk1JU-GvOt8b5sQXm1plV55V6NV9sE8WXh9VGOKqaA","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSVAZVvIhjtAapRft2909SFQ9XwukVlV_AUBIaGSni6-sn6xDcZpUzj4nxYV99mzQQbaSOv4_QWHd_4W_ODvxrpjh0GiFVHzogqsNZiCKtGKBZ7pEyn47YMww"],category:"Computers"},
+  {id:14,name:"Power Bank",desc:"10000mAh fast charging",price:1500,images:["https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTYv-qiPyM0QntkGcGGa56zoQ5-9bF7sKytnwn8ukmzXU_fX8sLDLJ7wcbutq12Di-izV9ZdiTHnH5UR01ParFk6i9-U12wfWqieCMEEW4bdPbiQEqE9ooqplE","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS3cUw2pIWxRS5wYe0miC3lOlVOs-eTqJe0BIIS7T_9xdTh6XHiqvLQvuR4rgwEQ2CPXIvs4QDNf-TpVHiBZFlQFd5m4aT_p6a8lXCEI6gUwfZBWLIlEi7fzA","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRHEdS5tvKawYiog44Fy9kv_qi9rdN3Kd1UUjJ7jo7MueERZH4gwHQ92_SE9MftwQjkvO3U0Od9dhnmg1Odp07Mdd6mKvIaLdJLgXbDASEr7Mlhemt4mpTT","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTbvIdxgsUNM4KSqkc39vNQsJ-1d_1Kcph9A7IoKzvU8Uj-kdXg7FDJ9yiBVVgrJu0-bhyMuJ6Gwfgf7WBhZYeiXwg8maJzJBcE1Xddt8zW-aaZHnaQuxgY","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQeY2BGyjv-zi_Pea_IVPgAnCDH7Pl0gb2a8dOKgcH-PHsOPmTZ92R-6jQBK2Th39W-KAoigTl2NzxEkmC7Lczd6GltgY_hkYKkRmLP74OC"],category:"Accessories"},
+  {id:15,name:"TV",desc:"55 inch 4K Smart TV",price:65000,images:["https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTrOxXhp3X1zJUxeFSnbDBFOge0P6IGVCrwcaP0XY4E1vwZu3uVDFCGITUowtdEv2OHXIcz4rk39_WZgDCkCH4ehMHL01jqTgp3MLrdpyx6w1y8jaoAhKjm","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQadtHKAexEaIAJaJuaz39p5tbnVZM--FtSUrhUrjiPU-VGlxfLQGXnGYFUa8b-PfxIk9AanZct_WO5O_bbtt3fIybGyFbprGBxlilJY7uPJa4gXRPK6XAJmQ","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRD0f2dQY-wbgwnJwOHnUG_xcul6h0KWq-8tZaZ_xZ6hyaeG_EkuH4g2Ywtg6uleSnA4SCQQtL4IbifDKUxHPaYDVn-m-Zw4T3P_2BY_nqLWqM0F_BuoQwh","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRdMA8ReefLy7fqrqvIWS8u_ft42sLhIUSN7L-NjtMQbZ1W3TLtMLkq1LkUoqr6Mr0A8FcI-gG5ounqLF0aySYhI9TzadnBCj_2DlT1owP3"],category:"Electronics"},
+  {id:16,name:"Air Conditioner",desc:"Energy efficient AC",price:40000,images:["https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSuUPJg_2Cd3PSY25tqf8RSuGknb56IatWldGX-LZwgBhG8oeZrnXlqf-eYxcAsafABhX7QIMjff9AEzGBqTTqjpqlwsHsVU9fCF6cYaqzf94wXHe6uoR2j","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTssKvlcZmCveS8u_GtI9xF7zwT-CToV_EXukjoWaj1oDqL3YV2LnUIpdzYHikonToxRNKIwCCBZk1j-LotocvxkRy-4OPoXxtqk8f0M45tw17m_jvTQva_Ow","https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSZlLf4RaTJtoP8YY1zoO3ZMPjvlHLqLbW630n2hI19TeT6G25-taz4ngahP75Q6BKEVkWQOD5PjCqxXyDG9QHJLs95KWddnAbaQbVnofMO","https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRNoemFJlHURlf8HyvuGVVgvgfmgvI7hbauZF0SxD_11VvB1L4_eb0y2ziuo8GHKnxZGo0mwhxLVH9VS4yVHSTjrhIbo8agIsCOQ7rf8dHJXajAkw-Ac0XD","https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSbyrHhs5fQbHOr9j80VqWZWjT7x4LTGnLF2yC_TKp4aGFcoqVqn7InDhqihyvcIED7pHsiMsr9WAVeJfdIL5lce3yGx4RKUfN6zKqOicnH","https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQNps829aKkKbnLtdIMhxeYW9pLx0ajxIeO_PiSAggeCwnvXsby9USkazr0BkHmTd331GXw1L_zDxR-dJMcP2NCf6viSsYPYOeuq8p9MMU"],category:"Appliances"}
+ // For brevity, not included again. Use your full products array here.
+];
+// -------------------------------------------------
+
+function hideAllPages() {
+  loginPage.classList.add("hidden");
+  signupPage.classList.add("hidden");
+  homePage.classList.add("hidden");
+  productDetailPage.classList.add("hidden");
+  cartPageDiv.classList.add("hidden");
+  orderHistoryPage.classList.add("hidden");
+}
+function showLogin() { hideAllPages(); loginPage.classList.remove("hidden"); }
+function showSignup() { hideAllPages(); signupPage.classList.remove("hidden"); }
+
+async function login(e) {
+  e.preventDefault();
+  let email = document.getElementById("loginEmail").value.trim();
+  let pass = document.getElementById("loginPassword").value.trim();
+  if(email && pass) {
+    try {
+      const res = await fetch('http://localhost:5500/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        token = data.token;
+        localStorage.setItem("ibm_token", token);
+        currentUser = email;
+        hideAllPages();
+        homePage.classList.remove("hidden");
+        renderProducts();
+        updateCartCount();
+      } else {
+        alert(data.msg || "Login failed.");
+      }
+    } catch (err) {
+      alert("Network error during login.");
+    }
+  } else {
+    alert("Enter email and password!");
+  }
+}
+
+async function signup(e) {
+  e.preventDefault();
+  let name = document.getElementById("signupName").value.trim();
+  let email = document.getElementById("signupEmail").value.trim();
+  let pass = document.getElementById("signupPassword").value.trim();
+  if(name && email && pass) {
+    try {
+      const res = await fetch('http://localhost:5500/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Account created! Please log in.");
+        showLogin();
+      } else {
+        alert(data.msg || "Registration failed.");
+      }
+    } catch (err) {
+      alert("Network error during registration.");
+    }
+  } else {
+    alert("Please fill all fields!");
+  }
+}
+
+function logout() {
+  currentUser = "";
+  cart = [];
+  token = "";
+  localStorage.removeItem("ibm_token");
+  showLogin();
+}
+
+document.getElementById("loginForm").addEventListener("submit", login);
+document.getElementById("signupForm").addEventListener("submit", signup);
+document.getElementById("showSignupBtn").addEventListener("click", showSignup);
+document.getElementById("showLoginBtn").addEventListener("click", showLogin);
+
+showLogin();
+
+// --- UI/Product rendering (unchanged for you) ---
+function renderProducts(productsToRender){
+  productList.innerHTML="";
+  const arr = productsToRender || products;
+  arr.forEach((p)=>{
+    const card=document.createElement("div"); card.className="product-card";
+    card.innerHTML=`<img src="${p.images[0]}"><h3>${p.name}</h3><p>₹${p.price}</p>`;
+    card.onclick=()=>showProductDetail(p.id);
+    productList.appendChild(card);
+  });
+}
+function filterCategory(cat){ if(cat==='All'){ renderProducts(); return; } const filtered = products.filter(p=>p.category===cat); renderProducts(filtered); }
+function searchProducts(){ const query = searchBar.value.trim().toLowerCase(); if(!query){ renderProducts(); return; } const filtered = products.filter(p=>p.name.toLowerCase().includes(query)); renderProducts(filtered); }
+function showProductDetail(id){
+  currentProduct=products.find(p=>p.id===id); if(!currentProduct) return; currentSlide=0;
+  detailName.textContent=currentProduct.name; detailDesc.textContent=currentProduct.desc;
+  detailPrice.textContent=currentProduct.price; detailImg.src=currentProduct.images[currentSlide];
+  slideIndicator.textContent=`${currentSlide+1}/${currentProduct.images.length}`; renderThumbnails();
+  hideAllPages(); productDetailPage.classList.remove("hidden");
+}
+function prevSlide(){ if(!currentProduct) return; currentSlide=(currentSlide-1+currentProduct.images.length)%currentProduct.images.length; detailImg.src=currentProduct.images[currentSlide]; slideIndicator.textContent=`${currentSlide+1}/${currentProduct.images.length}`; updateThumbnailHighlight(); }
+function nextSlide(){ if(!currentProduct) return; currentSlide=(currentSlide+1)%currentProduct.images.length; detailImg.src=currentProduct.images[currentSlide]; slideIndicator.textContent=`${currentSlide+1}/${currentProduct.images.length}`; updateThumbnailHighlight(); }
+function renderThumbnails() {
+  thumbnailContainer.innerHTML = "";
+  currentProduct.images.forEach((img, i) => {
+    const t = document.createElement("img");
+    t.src = img;
+    t.onclick = () => {
+      currentSlide = i;
+      detailImg.src = img;
+      slideIndicator.textContent = `${currentSlide+1}/${currentProduct.images.length}`;
+      updateThumbnailHighlight();
+    };
+    if(i === currentSlide) t.classList.add("selected");
+    thumbnailContainer.appendChild(t);
+  });
+}
+
+function updateThumbnailHighlight(){ const imgs = thumbnailContainer.querySelectorAll("img"); imgs.forEach((img,i)=>{ img.classList.toggle("selected", i===currentSlide); }); }
+function backToHome(){ hideAllPages(); homePage.classList.remove("hidden"); renderProducts(); }
+function addToCart(){ if(!currentProduct) return; const existing=cart.find(c=>c.id===currentProduct.id); if(existing) existing.qty++; else cart.push({...currentProduct,qty:1}); updateCartCount(); alert("Added to cart!"); }
+function updateCartCount(){ cartCountEl.textContent=cart.reduce((a,b)=>a+b.qty,0); }
+
+// --- CART & ORDER TO DATABASE ---
+async function Buy() {
+  if(cart.length === 0) {
+    alert("Cart is empty!");
+    return;
+  }
+  const total = cart.reduce((a,b) => a + b.price*b.qty, 0);
+  try {
+    const res = await fetch('http://localhost:5500/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ items: cart.map(item => ({
+        product: { ...item },
+        qty: item.qty
+      })), total })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert("Order placed!");
+      cart = [];
+      updateCartCount();
+      backToHome();
+    } else {
+      alert(data.msg || "Order failed.");
+    }
+  } catch (err) {
+    alert("Network error during order.");
+  }
+}
+
+// --- ORDER HISTORY from MongoDB (with Cancel Button!) ---
+async function showOrders() {
+  hideAllPages();
+  orderHistoryPage.classList.remove("hidden");
+  try {
+    const res = await fetch('http://localhost:5500/api/orders', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const orderListDiv = document.getElementById("orderList");
+    if(!data.length) { orderListDiv.textContent="No orders yet."; return; }
+    orderListDiv.innerHTML = "";
+    data.forEach((order, i) => {
+      const itemsText = order.items.map(item =>
+        `${item.product.name} x${item.qty} (₹${item.product.price*item.qty})`
+      ).join(" | ");
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        <span>${i+1}. ${itemsText}</span>
+        <button onclick="cancelOrder('${order._id}')" style="margin-left:10px;background:#dc3545;color:#fff;padding:6px 12px;border-radius:5px;">
+          Cancel
+        </button>`;
+      orderListDiv.appendChild(div);
+    });
+  } catch {
+    document.getElementById("orderList").textContent = "Could not load order history.";
+  }
+}
+
+// --- CANCEL ORDER function ---
+async function cancelOrder(orderId) {
+  if (!confirm("Are you sure you want to cancel this order?")) return;
+  try {
+    const res = await fetch(`http://localhost:5500/api/orders/${orderId}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert("Order cancelled!");
+      showOrders(); // Refresh order list
+    } else {
+      alert("Error cancelling order: " + data.msg);
+    }
+  } catch {
+    alert("Network error!");
+  }
+}
+
+// --- CART VIEW & UPDATE ---
+function showCart(){
+  hideAllPages(); cartPageDiv.classList.remove("hidden");
+  const cartItemsDiv=document.getElementById("cartItems"); cartItemsDiv.innerHTML=""; let total=0;
+  cart.forEach((item,index)=>{
+    total+=item.price*item.qty;
+    const div=document.createElement("div"); div.className="cart-item";
+    div.innerHTML=`
+      <span>${item.name}</span>
+      <div class="qty-controls">
+        <button onclick="updateQty(${index}, -1)">-</button>
+        ${item.qty}
+        <button onclick="updateQty(${index}, 1)">+</button>
+      </div>
+      <span>₹${item.price*item.qty} <button class="remove-btn" onclick="removeCartItem(${index})">Remove</button></span>`;
+    cartItemsDiv.appendChild(div);
+  });
+  document.getElementById("cartTotal").textContent=total;
+}
+function updateQty(index, change){ cart[index].qty += change; if(cart[index].qty < 1) cart.splice(index,1); showCart(); updateCartCount(); }
+function removeCartItem(index){ cart.splice(index,1); showCart(); updateCartCount(); }
+</script>
+</script>
+</body>
+</html>
